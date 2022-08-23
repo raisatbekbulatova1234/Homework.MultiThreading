@@ -1,19 +1,22 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+
 public class Main {
-    public static void main(String[] args) {
-        ThreadGroup mainGroup = new ThreadGroup("main group");
 
-        System.out.println("Создание потоков");
-
-        Thread thread1 = new MyThread(mainGroup, "Поток 1");
-        Thread thread2 = new MyThread(mainGroup, "Поток 2");
-        Thread thread3 = new MyThread(mainGroup, "Поток 3");
-        Thread thread4 = new MyThread(mainGroup, "Поток 4");
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        List<Future<String>> futureTask = new ArrayList<>();
+        for (int i = 1; i <= 4; i++) {
+            futureTask.add(executorService.submit(new MyCallable("поток " + i)));
         }
-        System.out.println("Завершение всех потоков");
-        mainGroup.interrupt();
+
+        Thread.sleep(15000);
+        executorService.shutdownNow();
+
+        for (Future<String> future : futureTask) {
+            System.out.println(future.get());
+        }
+
     }
 }
